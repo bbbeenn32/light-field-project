@@ -111,8 +111,8 @@ ENV/
 docs/.buildinfo
 
 # Example images
-examples/*.png
-examples/*.json
+examples/data/*.png
+examples/data/*.json
 
 # Figures and results
 figures/
