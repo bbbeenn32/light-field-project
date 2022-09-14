@@ -64,8 +64,6 @@ setup(
     description="Plenoptic imaging reconstruction tools",
     install_requires=requirements,
     license="GNU General Public License v3",
-    long_description=readme + '\n\n' + history,
-    long_description_content_type='text/markdown',
     include_package_data=True,
     keywords='plenoptomos',
     name='plenoptomos',
