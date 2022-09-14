@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 This module contains the tomographic refocusing routines.
+
 @author: Nicola VIGANÒ, Computational Imaging group, CWI, The Netherlands,
 and ESRF - The European Synchrotron, Grenoble, France
+
 Created on Wed Mar  8 11:30:00 2017
 """
 
@@ -23,6 +25,7 @@ from typing import Optional, Union, Sequence
 
 class Projector(object):
     """Projector class: it allows to forward-project and back-project light-fields.
+
     This class should not be used directly, but rather through the functions
     provided in the containing module.
     """
@@ -96,6 +99,7 @@ class Projector(object):
     def _init_geometry(self, zs):
         """The this function produces the ASTRA geometry needed to refocus or
         project light-fields.
+
         This function is based on the geometry described in the following articles:
         [1] N. Viganò, et al., “Tomographic approach for the quantitative scene
         reconstruction from light field images,” Opt. Express, vol. 26, no. 18,
@@ -120,8 +124,9 @@ class Projector(object):
 
         M = ref_z / self.camera.z1
         camera_pixel_size_ts_us = np.array(self.camera.pixel_size_ts) / self.up_sampling
-
-        renorm_resolution_factor = 2 #np.mean(camera_pixel_size_ts_us) * M
+        
+        #renorm_resolution_factor = self.camera.forward_parameters[0]
+        renorm_resolution_factor = np.mean(camera_pixel_size_ts_us) * M
         zs_n = zs / renorm_resolution_factor
 
         voxel_size_obj_space_ts = camera_pixel_size_ts_us * M
@@ -149,9 +154,14 @@ class Projector(object):
         ph_imgs_vu[:, 1] = virt_pos_v.flatten() / renorm_resolution_factor
         ph_imgs_vu[:, 2] = 0
 
-        up_sampled_array_size = np.array(self.camera.data_size_ts) * self.up_sampling
-        lims_s = (np.array([-1.0, 1.0]) * up_sampled_array_size[1] / 2) * voxel_size_obj_space_ts[1] / renorm_resolution_factor
-        lims_t = (np.array([-1.0, 1.0]) * up_sampled_array_size[0] / 2) * voxel_size_obj_space_ts[0] / renorm_resolution_factor
+        #up_sampled_array_size = np.array(self.camera.data_size_ts) * self.up_sampling
+        #print('up_sampled 1', up_sampled_array_size)
+        up_sampled_array_size = np.array([self.camera.forward_parameters[1],self.camera.forward_parameters[2]], dtype='int64')
+        #print('upsamle_2', up_sampled_array_size)
+        #up_sampled_array_size = np.array(self.camera.data_size_ts) * self.up_sampling
+        lims_s = (np.array([-1.0, 1.0]) * up_sampled_array_size[1] / 2) * self.camera.forward_parameters[0] / renorm_resolution_factor
+        lims_t = (np.array([-1.0, 1.0]) * up_sampled_array_size[0] / 2) * self.camera.forward_parameters[0] / renorm_resolution_factor
+        
 
         num_dists = len(zs_n)
         if self.use_many_projs:
@@ -224,6 +234,7 @@ class Projector(object):
         }
         for vg in self.vol_geom:
             proj_id = astra.create_projector("cuda3d", self.proj_geom, vg, opts)
+            print('ran')
             self.projectors.append(proj_id)
         self.is_initialized = True
 
@@ -263,7 +274,9 @@ class Projector(object):
 
     def FP(self, x):
         """Forward-projection function
+
         :param x: The volume to project (numpy.array_like)
+
         :returns: The projected light-field
         :rtype: numpy.array_like
         """
@@ -314,7 +327,9 @@ class Projector(object):
 
     def BP(self, y):
         """Back-projection function
+
         :param x: Light-field to back-project (numpy.array_like)
+
         :returns: The back-projected volume
         :rtype: numpy.array_like
         """
@@ -424,6 +439,7 @@ def compute_refocus_backprojection(
 ):
     """Compute refocusing of the input lightfield image at the input distances by
     applying the backprojection method.
+
     :param lf: The light-field object (lightfield.Lightfield)
     :param zs: Refocusing distances (numpy.array_like)
     :param up_sampling: Integer greater than 1 for up-sampling of the final images (int, default: 1)
@@ -433,6 +449,7 @@ def compute_refocus_backprojection(
     :param border_padding: Border padding method (string, default: 'edge')
     :param beam_geometry: Beam geometry. Possible options: 'parallel' | 'cone' (string, default: 'parallel')
     :param domain: Refocusing domain. Possible options: 'object' | 'image' (string, default: 'object')
+
     :returns: Stack of 2D refocused images.
     :rtype: numpy.array_like
     """
@@ -514,6 +531,7 @@ def compute_refocus_iterative(
     verbose: bool = False,
 ):
     """Compute refocusing of the input lightfield image at the input distances by applying iterative methods.
+
     Parameters
     ----------
     lf : lightfield.Lightfield
@@ -544,10 +562,12 @@ def compute_refocus_iterative(
         It allows to pin a specific GPU. The default is -1.
     verbose : bool, optional
         Whether to have verbose output from algorithms. The default is False.
+
     Raises
     ------
     ValueError
         DESCRIPTION.
+
     Returns
     -------
     numpy.array_like
@@ -636,6 +656,7 @@ def compute_refocus_iterative(
 
 def compute_refocus_iterative_multiple(*args, **kwds):
     """Compute refocusing of the input lightfield image jointly at the input distances by applying iterative methods.
+
     For the parameters description refer to the function :func:`~compute_refocus_iterative`.
     """
     return compute_refocus_iterative(*args, zs_independent=False, **kwds)

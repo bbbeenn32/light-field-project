@@ -29,6 +29,7 @@ from . import psf  # noqa: F401, F402
 
 try:
     from . import tomo  # noqa: F401, F402
+    from . import tomo_edits
     from . import depth  # noqa: F401, F402
 except ImportError as ex:
     print("WARNING: error while importing tomography module.\nAdvanced refocusing and depth estimation will not be available")

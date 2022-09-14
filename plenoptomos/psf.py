@@ -187,13 +187,15 @@ class PSF(object):
 
     def plot(self):
         pixels_distance = (self.data.shape[0] - 1) / 2
-        grid_p = np.linspace(-pixels_distance, pixels_distance, 2 * pixels_distance + 1)
+        grid_p = np.linspace(-pixels_distance, pixels_distance, int(2 * pixels_distance + 1))
         [grid_p1, grid_p2] = np.meshgrid(grid_p, grid_p, indexing="ij")
 
         f = plt.figure()
-        ax = f.add_subplot(1, 1, 1, projection="3d")
-        ax.plot_surface(grid_p1, grid_p2, self.data)
-        ax.view_init(12, -7.5)
+        plt.pcolor(grid_p1,grid_p2, np.log(self.data))
+        
+        #ax = f.add_subplot(1, 1, 1, projection="3d")
+        #ax.plot_surface(grid_p1, grid_p2, self.data)
+        #ax.view_init(12, -7.5)
         plt.show()
 
     def clone(self):

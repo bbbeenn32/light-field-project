@@ -51,6 +51,8 @@ def get_camera(model_name, down_sampling_st=1, down_sampling_uv=1):
         camera.pixel_size_vu = camera.z1 * camera.pixel_size_yx / camera.f2
         camera.aperture_f1 = 2.0
         camera.aperture_f2 = 2.0
+        camera.forward_parameters = ['voxel_size','Y','X']
+        camera.sensor_size = np.array([33.0,44.0]) #mm medium format
     else:
         raise ValueError("Camera '%s' is not supported!" % model_name)
     return camera

@@ -19,7 +19,7 @@ import os
 
 import plenoptomos as pleno
 
-data_dir = "examples/data/"
+data_dir = "data/"
 dpath = os.path.join(data_dir, "flowers_plants_30_eslf.png")
 jpath = os.path.join(data_dir, "flowers_plants_30.json")
 

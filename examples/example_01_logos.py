@@ -20,8 +20,8 @@ import matplotlib.image as mim
 import plenoptomos as pleno
 
 print("Setting up the known volume..")
-cwi_img = mim.imread("examples/data/cwi_logo_small.png")
-vox_img = mim.imread("examples/data/voxel_logo_small.png")
+cwi_img = mim.imread("data/cwi_logo_small.png")
+vox_img = mim.imread("data/voxel_logo_small.png")
 
 alphas_ph = np.array((1.1, 1, 0.90))
 vols_shape = (alphas_ph.size, 256, 512)
@@ -51,6 +51,8 @@ camera = pleno.lightfield.get_camera("synthetic")
 
 z0 = camera.get_focused_distance()
 z0s_ph = z0 * alphas_ph  # The layer positions in the phantom
+
+print(alphas_ph)
 
 # adding some border to avoid the single images falling out of the sub-aperture images
 border = 40
