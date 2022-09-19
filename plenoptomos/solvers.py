@@ -17,6 +17,7 @@ import scipy.sparse as sps
 from . import utils_io
 
 import time as tm
+import tifffile as tf
 
 try:
     import pywt
@@ -65,6 +66,13 @@ class Solver(object):
     def lower(self):
         return type(self).__name__.lower()
 
+
+class MLEM(Solver):
+    def __init__(self, verbose=False, dump_file=None, tol=0.00001):
+        super().__init__(verbose, dump_file, tol)
+
+    def __call__(self, A, b, num_iter=10, At=None, lower_limit=None):
+        pass
 
 class BPJ(Solver):
     def __init__(self, verbose=False, weight_det=None, dump_file=None, tol=1e-5):
@@ -115,10 +123,13 @@ class Sirt(Solver):
 
         data_type = b.dtype
 
+        print('shape of b ', b.shape)
         c_in = tm.time()
 
         renorm_bwd = At(np.ones(b.shape, data_type))
         renorm_bwd = np.abs(renorm_bwd)
+        print('renorm_bwd shape ',renorm_bwd.shape)
+        tf.imwrite('renmorm_matrix.tif', renorm_bwd.astype('float16'))
         renorm_bwd[(renorm_bwd / np.max(renorm_bwd)) < 1e-5] = 1
         renorm_bwd = 1 / renorm_bwd
 
@@ -145,7 +156,7 @@ class Sirt(Solver):
             print("- Performing SIRT iterations (init: %g seconds): " % (c_init - c_in), end="", flush=True)
         for ii in range(num_iter):
             if self.dump_file is not None:
-                out_x[ii, ...] = x
+                out_x[ii, ...] = x                                         #######Tracking changes per it
 
             if self.verbose:
                 prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, num_iter, (tm.time() - c_init) / np.fmax(ii, 1))
@@ -153,7 +164,7 @@ class Sirt(Solver):
 
             res = b - A(x)
 
-            rel_res_norms[ii] = npla.norm(res.flatten()) / res_norm_0
+            rel_res_norms[ii] = npla.norm(res.flatten()) / res_norm_0      ##Tracking changes per it
             if self.tol is not None and rel_res_norms[ii] < self.tol:
                 break
 

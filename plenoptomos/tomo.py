@@ -599,6 +599,8 @@ def compute_refocus_iterative(
                 algo = solvers.BPJ(verbose=verbose)
             elif algorithm.lower() == "sirt":
                 algo = solvers.Sirt(verbose=verbose)
+            elif algorithm.lower() == "mlem":
+                algo = solvers.MLEM(verbose=verbose)
             else:
                 raise ValueError("Unknown algorithm: %s" % algorithm.lower())
 
