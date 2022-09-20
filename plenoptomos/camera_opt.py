@@ -9,8 +9,9 @@ import tifffile as tf
 
 ############################################## Object Optimization #############################################
 
-def natural_vignetting(camera, z0s,model,falloff='linear'):
-    """This computes the natural vignetting which occurs for objects off the optical axis (reference is found in Applied Photographic optics sidney"""
+def natural_vignetting(camera, z0s,model, falloff='linear'):
+    """This computes the natural vignetting which occurs for objects off the optical axis (reference is found in Applied Photographic optics sidney
+    Fall off can be distance squared if object is small and order of 10 diameters away"""
     D = camera.aperture_f1 / camera.f1
     A = np.pi*(D/2)**2 #Area of aperture/lense
     voxel_area = camera.forward_parameters[0]**2
@@ -84,6 +85,13 @@ def camera_checker(camera,z0):
     if z0 < 4*camera.f1:
         print('object is probably too close to camera to be able to focus')
     print('camera z1 ', camera.z1)
+
+
+def forward_model(MLA_diameter, MLA_num, focal_length, z0, model):
+    """Will generate the forward projections"""
+    pass
+
+
 
 
 ######################################################## IMAGE saving #############################################################

@@ -71,8 +71,74 @@ class MLEM(Solver):
     def __init__(self, verbose=False, dump_file=None, tol=0.00001):
         super().__init__(verbose, dump_file, tol)
 
-    def __call__(self, A, b, num_iter=10, At=None, lower_limit=None):
-        pass
+    def __call__(self, A, b, num_iter=10, At=None, lower_limit=0):
+        """
+        """
+        (A, At) = self.initialize_data_operators(A, At)
+        
+        data_type = b.dtype()
+
+        c_in = tm.time()
+
+        x = np.ones(At(b).shape, data_type)
+        renorm_bwd = At(np.ones(b.shape, data_type))
+        renorm_bwd = np.abs(renorm_bwd)
+        renorm_bwd[(renorm_bwd / np.max(renorm_bwd)) < 1e-5] = 1
+        renorm_bwd = 1 / renorm_bwd
+        
+
+        res_norm_0 = npla.norm(b.flatten())     #Used in loop Orignal data
+        rel_res_norms = np.empty((num_iter,))   #Used in loop
+
+        if self.dump_file is not None:
+            out_x = np.empty(np.concatenate(((num_iter,), x.shape)), dtype=x.dtype)
+
+        c_init = tm.time()
+
+        if self.verbose:
+            print("- Performing ML-EM iterations (init: %g seconds): " % (c_init - c_in), end="", flush=True)
+        
+        for ii in range(num_iter):
+            if self.dump_file is not None:
+                out_x[ii, ...] = x                                         #######Tracking changes per it
+
+            if self.verbose:
+                prnt_str = "%03d/%03d (avg: %g seconds)" % (ii, num_iter, (tm.time() - c_init) / np.fmax(ii, 1))
+                print(prnt_str, end="", flush=True)
+
+            ratio = np.divide(b/A(x))
+            
+            x = np.multiply()
+
+
+            res = b - A(x)
+
+            rel_res_norms[ii] = npla.norm(res.flatten()) / res_norm_0      ##Tracking changes per it
+            if self.tol is not None and rel_res_norms[ii] < self.tol:
+                break
+
+            x += (At(res * renorm_fwd)) * renorm_bwd
+
+            if lower_limit is not None:
+                x = np.fmax(x, lower_limit)
+            if upper_limit is not None:
+                x = np.fmin(x, upper_limit)
+
+            if self.verbose:
+                print(("\b") * len(prnt_str), end="", flush=True)
+                print((" ") * len(prnt_str), end="", flush=True)
+                print(("\b") * len(prnt_str), end="", flush=True)
+
+        if self.verbose:
+            print("Done in %g seconds." % (tm.time() - c_in))
+
+        if self.dump_file is not None:
+            utils_io.save_field_toh5(self.dump_file, "iterations", out_x)
+
+
+
+
+
 
 class BPJ(Solver):
     def __init__(self, verbose=False, weight_det=None, dump_file=None, tol=1e-5):
