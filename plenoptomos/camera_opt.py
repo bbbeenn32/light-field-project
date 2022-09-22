@@ -9,6 +9,15 @@ import tifffile as tf
 
 ############################################## Object Optimization #############################################
 
+
+def object_placement(camera, z0, model, center = True):
+    """Returns the proper alpha phs based on if focus is in the center or front of object"""
+
+    
+
+    return alpha_ph
+
+
 def natural_vignetting(camera, z0s,model, falloff='linear'):
     """This computes the natural vignetting which occurs for objects off the optical axis (reference is found in Applied Photographic optics sidney
     Fall off can be distance squared if object is small and order of 10 diameters away"""

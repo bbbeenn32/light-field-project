@@ -234,7 +234,6 @@ class Projector(object):
         }
         for vg in self.vol_geom:
             proj_id = astra.create_projector("cuda3d", self.proj_geom, vg, opts)
-            print('ran')
             self.projectors.append(proj_id)
         self.is_initialized = True
 
@@ -619,6 +618,8 @@ def compute_refocus_iterative(
                 algo = solvers.BPJ(verbose=verbose)
             elif algorithm.lower() == "sirt":
                 algo = solvers.Sirt(verbose=verbose)
+            elif algorithm.lower() == "mlem":
+                algo = solvers.MLEM(verbose=verbose)
             else:
                 raise ValueError("Unknown algorithm: %s" % algorithm.lower())
 
@@ -640,7 +641,7 @@ def compute_refocus_iterative(
 
             print(": Done in %g seconds." % (tm.time() - c_it))
     else:
-        imgs, _ = do_refocus(zs)
+        imgs, residual, residual_poisson = do_refocus(zs)
 
     # Crop the refocused images:
     paddings_ts_lower = paddings_ts_lower * up_sampling
@@ -651,7 +652,7 @@ def compute_refocus_iterative(
     print(" * Done in %g seconds." % (c_out - c_in))
 
     # Return the stack of refocused images:
-    return imgs
+    return imgs, residual, residual_poisson
 
 
 def compute_refocus_iterative_multiple(*args, **kwds):
