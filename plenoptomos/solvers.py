@@ -9,6 +9,7 @@ and ESRF - The European Synchrotron, Grenoble, France
 Created on Wed Mar  8 11:27:12 2017
 """
 
+from tkinter import W
 import numpy as np
 import numpy.linalg as npla
 
@@ -68,7 +69,7 @@ class Solver(object):
 
 
 class MLEM(Solver):
-    def __init__(self, verbose=False, dump_file=None, tol=0.00001):
+    def __init__(self, verbose=True, dump_file=None, tol=0.00001):
         super().__init__(verbose, dump_file, tol)
 
     def __call__(self, A, b, num_iter, At=None, upper_limit=None, lower_limit=0, tol=1e-5):
@@ -83,8 +84,7 @@ class MLEM(Solver):
         x = np.ones(At(b).shape, data_type)
         renorm_bwd = At(np.ones(b.shape, data_type))
         renorm_bwd = np.abs(renorm_bwd)
-        max = np.max(renorm_bwd)
-        np.clip(renorm_bwd, 0.00001, max, out=renorm_bwd)
+        renorm_bwd[renorm_bwd == 0 ] = 1   #can't divide by zero
         renorm_bwd = 1 / renorm_bwd
         
 
@@ -108,16 +108,25 @@ class MLEM(Solver):
                 print(prnt_str, end="", flush=True)
 
             dem = A(x)
-            np.clip(dem, 0.00001, 10000, out=dem)
-            weight = renorm_bwd * At(b/dem)
+            dem[dem < 0.00000001] = np.nan
+            ratio = b / dem
+            ratio[np.isnan(ratio)] = 0
+
+            weight = renorm_bwd * At(ratio)
             
             x *= weight
 
             res = b - A(x)
 
             rel_res_norms[ii] = npla.norm(res.flatten()) / res_norm_0      ##Tracking changes per it
-            rel_res_poisson[ii] = np.sum(b * np.log(A(x)) - A(x))
+            
 
+            forward = A(x)
+            forward[forward < 0.00000001] = np.nan
+            value = b * np.log(forward) - A(x)
+            value[np.isnan(value)] = 0
+            sum = np.sum(value)
+            rel_res_poisson[ii] = sum
             if self.tol is not None and rel_res_norms[ii] < self.tol:
                 break
 
@@ -198,8 +207,8 @@ class Sirt(Solver):
 
         renorm_bwd = At(np.ones(b.shape, data_type))
         renorm_bwd = np.abs(renorm_bwd)
-        print('renorm_bwd shape ',renorm_bwd.shape)
-        tf.imwrite('renmorm_matrix.tif', renorm_bwd.astype('float16'))
+        #print('renorm_bwd shape ',renorm_bwd.shape)
+        #tf.imwrite('renmorm_matrix.tif', renorm_bwd.astype('float16'))
         renorm_bwd[(renorm_bwd / np.max(renorm_bwd)) < 1e-5] = 1
         renorm_bwd = 1 / renorm_bwd
 

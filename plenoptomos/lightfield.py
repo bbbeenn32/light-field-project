@@ -27,8 +27,8 @@ def get_camera(model_name, down_sampling_st=1, down_sampling_uv=1):
     camera = Camera(model=model_name)
     if model_name.lower() == "lytro_illum":
         camera.data_size_vu = np.array((14, 14), dtype=np.intp)
-        camera.pixel_size_ts = np.array((20e-3, 20e-3), dtype=np.float32)
-        camera.pixel_size_yx = camera.pixel_size_ts / camera.data_size_vu
+        camera.pixel_size_ts = np.array((0.0196, 0.0196), dtype=np.float32)
+        camera.pixel_size_yx = np.array((0.0014, 0.0014), dtype=np.float32) #camera.pixel_size_ts / camera.data_size_vu
     elif model_name.lower() == "stanford_archive":
         camera.data_size_vu = np.array((17, 17), dtype=np.intp)
         camera.pixel_size_yx = np.array((5.7e-3, 5.7e-3), dtype=np.float32)
@@ -51,7 +51,7 @@ def get_camera(model_name, down_sampling_st=1, down_sampling_uv=1):
         camera.pixel_size_vu = camera.z1 * camera.pixel_size_yx / camera.f2
         camera.aperture_f1 = 2.0
         camera.aperture_f2 = 2.0
-        camera.forward_parameters = ['voxel_size','Y','X']
+        camera.forward_parameters = ['voxel_size','Y','X', True]
         camera.sensor_size = np.array([33.0,44.0]) #mm medium format
     else:
         raise ValueError("Camera '%s' is not supported!" % model_name)

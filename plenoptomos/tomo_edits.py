@@ -125,7 +125,6 @@ class Projector(object):
         M = ref_z / self.camera.z1
         camera_pixel_size_ts_us = np.array(self.camera.pixel_size_ts) / self.up_sampling
         
-        #renorm_resolution_factor = self.camera.forward_parameters[0]
         renorm_resolution_factor = np.mean(camera_pixel_size_ts_us) * M
         zs_n = zs / renorm_resolution_factor
 
@@ -154,14 +153,16 @@ class Projector(object):
         ph_imgs_vu[:, 1] = virt_pos_v.flatten() / renorm_resolution_factor
         ph_imgs_vu[:, 2] = 0
 
-        #up_sampled_array_size = np.array(self.camera.data_size_ts) * self.up_sampling
-        #print('up_sampled 1', up_sampled_array_size)
-        up_sampled_array_size = np.array([self.camera.forward_parameters[1],self.camera.forward_parameters[2]], dtype='int64')
-        #print('upsamle_2', up_sampled_array_size)
-        #up_sampled_array_size = np.array(self.camera.data_size_ts) * self.up_sampling
-        lims_s = (np.array([-1.0, 1.0]) * up_sampled_array_size[1] / 2) * self.camera.forward_parameters[0] / renorm_resolution_factor
-        lims_t = (np.array([-1.0, 1.0]) * up_sampled_array_size[0] / 2) * self.camera.forward_parameters[0] / renorm_resolution_factor
-        
+       
+        if self.camera.forward_parameters[-1] == True:
+            up_sampled_array_size = np.array([self.camera.forward_parameters[1],self.camera.forward_parameters[2]], dtype='int64')
+            lims_s = (np.array([-1.0, 1.0]) * up_sampled_array_size[1] / 2) * self.camera.forward_parameters[0] / renorm_resolution_factor
+            lims_t = (np.array([-1.0, 1.0]) * up_sampled_array_size[0] / 2) * self.camera.forward_parameters[0] / renorm_resolution_factor
+        else:
+            up_sampled_array_size = np.array(self.camera.data_size_ts) * self.up_sampling
+            lims_s = (np.array([-1.0, 1.0]) * up_sampled_array_size[1] / 2) * voxel_size_obj_space_ts[1] / renorm_resolution_factor
+            lims_t = (np.array([-1.0, 1.0]) * up_sampled_array_size[0] / 2) * voxel_size_obj_space_ts[0] / renorm_resolution_factor
+
 
         num_dists = len(zs_n)
         if self.use_many_projs:
@@ -637,7 +638,7 @@ def compute_refocus_iterative(
                 f" * Refocusing {ii_z:03d}/{num_dists:03d} ({avg_time=:g} seconds)", end="", flush=True,
             )
 
-            imgs[ii_z, ...], _ = do_refocus(zs[ii_z])
+            imgs[ii_z, ...], residual, residual_poisson = do_refocus(zs[ii_z])
 
             print(": Done in %g seconds." % (tm.time() - c_it))
     else:

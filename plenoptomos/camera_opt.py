@@ -96,6 +96,15 @@ def camera_checker(camera,z0):
     print('camera z1 ', camera.z1)
 
 
+def lytro_calibration(lf, mag):
+    """Returns lf and z0"""
+    lf.camera.aperture_f2 = 1.875  #MLA f#
+    true_mag = 2*mag
+    z0 = (lf.camera.f1 * (1+true_mag))/true_mag
+    lf.camera.z1 = abs(1/lf.camera.f1-1/z0)**-1
+    return lf, z0
+
+
 def forward_model(MLA_diameter, MLA_num, focal_length, z0, model):
     """Will generate the forward projections"""
     pass
@@ -117,6 +126,6 @@ def image_saver(image, filename, meta):
     """Image is the lf_g object
     filename is string without tif
     meta is metadata dict object"""
-    tf.imwrite('{}.tif'.format(filename), image.astype('float16'))
+    tf.imwrite('{}.tif'.format(filename), image.astype('float16'), )
     #if isinstance
     #tf.imwrite()
