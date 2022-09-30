@@ -9,11 +9,16 @@ import tifffile as tf
 
 ############################################## Object Optimization #############################################
 
+def checkerboard(shape):
+    """This creates a checkboard pattern for simulations
+    Input: tuple(rows,column)"""
+    board = np.indices(shape).sum(axis=0) % 2
+    return board.astype('float32')
 
 def object_placement(camera, z0, model, center = True):
     """Returns the proper alpha phs based on if focus is in the center or front of object"""
 
-    
+    pass
 
     return alpha_ph
 
